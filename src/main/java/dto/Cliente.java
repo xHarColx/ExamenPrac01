@@ -99,6 +99,16 @@ public class Cliente implements Serializable {
         this.passClie = passClie;
     }
 
+    public Cliente(String ndniClie, String appaClie, String apmaClie, String nombClie, Date fechNaciClie, String logiClie, String passClie) {
+        this.ndniClie = ndniClie;
+        this.appaClie = appaClie;
+        this.apmaClie = apmaClie;
+        this.nombClie = nombClie;
+        this.fechNaciClie = fechNaciClie;
+        this.logiClie = logiClie;
+        this.passClie = passClie;
+    }
+
     public Integer getCodiClie() {
         return codiClie;
     }

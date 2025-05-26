@@ -49,6 +49,9 @@
         <!--end::Required Plugin(AdminLTE)-->
         <!-- Otros elementos head... -->
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="../../../CryptoJS v3.1.2/rollups/aes.js" type="text/javascript"></script>
+        <script src="../../../CryptoJS v3.1.2/components/mode-ecb-min.js" type="text/javascript"></script>
+
     </head>
     <!--end::Head-->
     <!--begin::Body-->
@@ -104,11 +107,7 @@
                             <div class="input-group-text"><span class="bi bi-lock-fill"></span></div>
                         </div>
 
-                        <!-- Confirmar Contraseña -->
-                        <div class="input-group mb-3">
-                            <input type="password" class="form-control" id="confirmPassClie" placeholder="Confirmar Contraseña" required />
-                            <div class="input-group-text"><span class="bi bi-lock-fill"></span></div>
-                        </div>
+
 
                         <!-- Términos y condiciones -->
                         <div class="row mb-3">
@@ -157,18 +156,41 @@
             </div>
 
             <script>
-                
+                const clave = "1234567890123456";
+                function cifrar(message, key) {
+                    let keyUtf8 = CryptoJS.enc.Utf8.parse(key);
+                    let encrypted = CryptoJS.AES.encrypt(message, keyUtf8, {
+                        mode: CryptoJS.mode.ECB,
+                        padding: CryptoJS.pad.Pkcs7
+                    });
+                    return encrypted.toString(); // Base64
+                }
+
+                function descifrar(ciphertext, key) {
+                    try {
+                        let keyUtf8 = CryptoJS.enc.Utf8.parse(key);
+                        let decrypted = CryptoJS.AES.decrypt(ciphertext, keyUtf8, {
+                            mode: CryptoJS.mode.ECB,
+                            padding: CryptoJS.pad.Pkcs7
+                        });
+                        return decrypted.toString(CryptoJS.enc.Utf8); // Retorna string plano
+                    } catch (e) {
+                        return "[Mensaje no descifrado]";
+                    }
+                }
+                function setCookie(nombre, valor, dias) {
+                    const fecha = new Date();
+                    fecha.setTime(fecha.getTime() + (dias * 24 * 60 * 60 * 1000));
+                    const expira = "expires=" + fecha.toUTCString();
+                    document.cookie = nombre + "=" + valor + ";" + expira + ";path=/";
+                }
+
+
                 document.getElementById('registroForm').addEventListener('submit', async function (e) {
                     e.preventDefault();
-                    
-                    const passClie = document.getElementById('passClie').value;
-                    const confirmPassClie = document.getElementById('confirmPassClie').value;
-                    
-                    if (passClie !== confirmPassClie) {
-                        alert('Las contraseñas no coinciden');
-                        return;
-                    }
-                    
+                    const pass = document.getElementById('passClie').value;
+                    const passCifrada = cifrar(pass, clave);
+
                     // Obtener valores sin jQuery
                     const formData = {
                         ndniClie: document.getElementById('ndniClie').value,
@@ -177,11 +199,11 @@
                         nombClie: document.getElementById('nombClie').value,
                         fechaNaci: document.getElementById('fechNaciClie').value,
                         logiClie: document.getElementById('logiClie').value,
-                        passsClie: passClie
+                        passsClie: passCifrada
                     };
-                    
+
                     console.log(formData);
-                    
+
                     try {
                         const response = await fetch('http://localhost:8080/ExamenPrac01/crear-cliente', {
                             method: 'POST',
@@ -190,14 +212,15 @@
                             },
                             body: JSON.stringify(formData)
                         });
-                        
+
                         const data = await response.json();
-                        
+                        console.log(data);
                         if (!response.ok) {
                             throw new Error(data.mensaje || 'Error en el servidor');
                         }
-                        
+
                         if (data.resultado === 'ok') {
+                            setCookie("token", data.token, 7);
                             alert('Cliente agregado exitosamente');
                             window.location.href = 'http://localhost:8080/ExamenPrac01/index.html';
                         } else {
