@@ -7,6 +7,8 @@ package dao;
 import dao.exceptions.NonexistentEntityException;
 import dto.Cliente;
 import java.io.Serializable;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -23,19 +25,19 @@ import util.SHA512Util;
  * @author harol
  */
 public class ClienteJpaController implements Serializable {
-    
+
     public ClienteJpaController(EntityManagerFactory emf) {
         this.emf = emf;
     }
     private EntityManagerFactory emf = Persistence.createEntityManagerFactory("com.mycompany_ExamenPrac01_war_1.0-SNAPSHOTPU");
-    
+
     public EntityManager getEntityManager() {
         return emf.createEntityManager();
     }
-    
+
     public ClienteJpaController() {
     }
-    
+
     public void create(Cliente cliente) {
         EntityManager em = null;
         try {
@@ -49,7 +51,7 @@ public class ClienteJpaController implements Serializable {
             }
         }
     }
-    
+
     public void edit(Cliente cliente) throws NonexistentEntityException, Exception {
         EntityManager em = null;
         try {
@@ -72,7 +74,7 @@ public class ClienteJpaController implements Serializable {
             }
         }
     }
-    
+
     public void destroy(Integer id) throws NonexistentEntityException {
         EntityManager em = null;
         try {
@@ -93,15 +95,15 @@ public class ClienteJpaController implements Serializable {
             }
         }
     }
-    
+
     public List<Cliente> findClienteEntities() {
         return findClienteEntities(true, -1, -1);
     }
-    
+
     public List<Cliente> findClienteEntities(int maxResults, int firstResult) {
         return findClienteEntities(false, maxResults, firstResult);
     }
-    
+
     private List<Cliente> findClienteEntities(boolean all, int maxResults, int firstResult) {
         EntityManager em = getEntityManager();
         try {
@@ -117,7 +119,7 @@ public class ClienteJpaController implements Serializable {
             em.close();
         }
     }
-    
+
     public Cliente findCliente(Integer id) {
         EntityManager em = getEntityManager();
         try {
@@ -126,7 +128,7 @@ public class ClienteJpaController implements Serializable {
             em.close();
         }
     }
-    
+
     public Cliente validarUsuario(Cliente u) {
         EntityManager em = getEntityManager();
         try {
@@ -141,7 +143,7 @@ public class ClienteJpaController implements Serializable {
             em.close();
         }
     }
-    
+
     public int getClienteCount() {
         EntityManager em = getEntityManager();
         try {
@@ -154,7 +156,18 @@ public class ClienteJpaController implements Serializable {
             em.close();
         }
     }
-    
+
+    public int calcularEdad(Date fecha) {
+        Calendar fechaInicial = Calendar.getInstance();
+        fechaInicial.setTime(fecha);
+        Calendar fechaActual = Calendar.getInstance();
+        int edad = fechaActual.get(Calendar.YEAR) - fechaInicial.get(Calendar.YEAR);
+        if (fechaActual.get(Calendar.DAY_OF_YEAR) < fechaInicial.get(Calendar.DAY_OF_YEAR)) {
+            edad--;
+        }
+        return edad;
+    }
+
     public static void main(String[] args) throws Exception {
         ClienteJpaController vurDAO = new ClienteJpaController();
         Cliente vur = vurDAO.validarUsuario(new Cliente("harol", "3c9909afec25354d551dae21590bb26e38d53f2173b8d"
@@ -169,12 +182,12 @@ public class ClienteJpaController implements Serializable {
         System.out.println("---------------------------");
         String contraSHA512 = SHA512Util.hash(contraDescifrada);
         System.out.println("Contra usando SHA512: " + contraSHA512);
-        
+
         if (vur != null) {
             System.out.println("PERSONA ENCONTRADA");
         } else {
             System.out.println("PERSONA NO ENCONTRADA");
         }
     }
-    
+
 }
