@@ -14,7 +14,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
+import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import util.AESUtil;
@@ -129,6 +131,41 @@ public class ClienteJpaController implements Serializable {
         }
     }
 
+    public Cliente findClienteByDni(String dni) {
+        EntityManager em = getEntityManager(); // Obtiene un EntityManager
+        try {
+            // Crea una consulta JPQL para buscar un Cliente por su ndniClie
+            TypedQuery<Cliente> query = em.createQuery(
+                    "SELECT c FROM Cliente c WHERE c.ndniClie = :dni", Cliente.class);
+            query.setParameter("dni", dni);
+            // setMaxResults(1) es una optimización si solo te interesa saber si existe al menos uno.
+            // Si esperas estrictamente uno o ninguno, getSingleResult() es apropiado.
+            return query.getSingleResult(); // Lanza NoResultException si no se encuentra
+        } catch (NoResultException e) {
+            return null; // Devuelve null si no se encuentra ningún cliente con ese DNI
+        } finally {
+            if (em != null) {
+                em.close(); // Cierra el EntityManager
+            }
+        }
+    }
+
+    public Cliente findClienteByLogin(String login) {
+        EntityManager em = getEntityManager();
+        try {
+            TypedQuery<Cliente> query = em.createQuery(
+                    "SELECT c FROM Cliente c WHERE c.logiClie = :login", Cliente.class);
+            query.setParameter("login", login);
+            return query.getSingleResult();
+        } catch (NoResultException e) {
+            return null; // Devuelve null si no se encuentra ningún cliente con ese login
+        } finally {
+            if (em != null) {
+                em.close();
+            }
+        }
+    }
+
     public Cliente validarUsuario(Cliente u) {
         EntityManager em = getEntityManager();
         try {
@@ -167,6 +204,7 @@ public class ClienteJpaController implements Serializable {
         }
         return edad;
     }
+
     public String cambiarClave(Cliente u, String nuevaClave) {
         EntityManager em = getEntityManager();
         try {
