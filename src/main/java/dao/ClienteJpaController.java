@@ -167,6 +167,27 @@ public class ClienteJpaController implements Serializable {
         }
         return edad;
     }
+    public String cambiarClave(Cliente u, String nuevaClave) {
+        EntityManager em = getEntityManager();
+        try {
+            Cliente usuario = validarUsuario(u);
+            if (usuario != null) { // Verifica que el usuario exista
+                if (usuario.getPassClie().equals(u.getPassClie())) {
+                    usuario.setPassClie(nuevaClave);
+                    edit(usuario);
+                    return "Clave cambiada";
+                } else {
+                    return "Clave actual no válida";
+                }
+            } else {
+                return "Usuario no encontrado"; // Manejo de usuario no encontrado
+            }
+        } catch (Exception ex) {
+            return null;
+        } finally {
+            em.close();
+        }
+    }
 
     public static void main(String[] args) throws Exception {
         ClienteJpaController vurDAO = new ClienteJpaController();

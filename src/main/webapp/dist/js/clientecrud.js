@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-// Al inicio de tu JS
+    // Al inicio de tu JS
     if (typeof bootstrap === 'undefined') {
         console.error('Bootstrap 5 no está cargado correctamente');
     }
@@ -25,24 +25,32 @@ document.addEventListener('DOMContentLoaded', function () {
                 {data: 'nombClie'},
                 {data: 'edad'},
                 {data: 'logiClie'},
-                {data: 'passClie'},
+                {
+                    data: 'passClie', // La data original
+                    render: function (data, type, row) {
+                        if (type === 'display' && data && data.length > 15) { // Truncar si es para mostrar y es muy largo
+                            return '<span title="' + data + '">' + data.substr(0, 15) + '...</span>';
+                        }
+                        return data; // Devolver data original para otros usos (ordenar, buscar)
+                    }
+                },
                 {
                     data: null,
                     render: function (data, type, row) {
                         return `<button class="btn btn-info btn-editar" 
-                                data-id="${row.codiClie}"
-                                data-appa="${row.appaClie}"
-                                data-apma="${row.apmaClie}"
-                                data-nomb="${row.nombClie}">
-                                Editar</button>`;
+                                    data-id="${row.codiClie}"
+                                    data-appa="${row.appaClie}"
+                                    data-apma="${row.apmaClie}"
+                                    data-nomb="${row.nombClie}">
+                                    Editar</button>`;
                     }
                 },
                 {
                     data: null,
                     render: function (data, type, row) {
                         return `<button class="btn btn-danger btn-eliminar" 
-                                data-id="${row.codiClie}">
-                                Eliminar</button>`;
+                                    data-id="${row.codiClie}">
+                                    Eliminar</button>`;
                     }
                 }
             ]
@@ -105,10 +113,10 @@ document.addEventListener('DOMContentLoaded', function () {
             modalEliminar.show();
         });
 
-// Función para preparar eliminación
+        // Función para preparar eliminación
 
 
-// Evento para confirmar eliminación
+        // Evento para confirmar eliminación
         $("#btnConfirmarEliminar").click(function () {
             let codiClie = $("#deleteCodiClie").val();
             let token = getCookie("token");
